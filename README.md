@@ -37,4 +37,4 @@ It is used for database migrations, initial system bootstrap, and headless admin
 
 ## License
 
-Apache-2.0
+MIT
