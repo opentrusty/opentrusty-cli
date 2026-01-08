@@ -2,11 +2,9 @@ module github.com/opentrusty/opentrusty-cli
 
 go 1.25.3
 
-replace github.com/opentrusty/opentrusty-core => ../opentrusty-core
-
 require (
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/opentrusty/opentrusty-core v0.0.0-00010101000000-000000000000
+	github.com/opentrusty/opentrusty-core v0.0.0-20260108142213-20efe39d59b9
 )
 
 require (
