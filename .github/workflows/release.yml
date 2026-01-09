@@ -31,7 +31,7 @@ jobs:
         id: prepare
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          DIR="opentrusty-cli"
+          DIR="opentrusty-cli-$VERSION"
           mkdir -p $DIR
           
           # Copy binary
