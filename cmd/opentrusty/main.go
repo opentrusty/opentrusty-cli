@@ -28,8 +28,11 @@ import (
 	"github.com/opentrusty/opentrusty-core/user"
 )
 
+var version = "dev"
+
 func main() {
 	if len(os.Args) < 2 {
+		fmt.Printf("OpenTrusty CLI version %s\n", version)
 		fmt.Println("Usage: opentrusty <command> [args]")
 		os.Exit(1)
 	}
