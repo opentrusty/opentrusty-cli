@@ -42,9 +42,10 @@ func main() {
 		log.Fatalf("failed to load configuration: %v", err)
 	}
 
-	db, err := postgres.Open(ctx, cfg.DBURL)
+	// Database
+	db, err := postgres.Open(ctx, cfg.DatabaseURL)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("failed to connect to database: %v", err)
 	}
 	defer db.Close()
 

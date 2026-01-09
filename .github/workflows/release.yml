@@ -1,0 +1,63 @@
+name: Release OpenTrusty CLI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+
+
+      - name: Build Binary
+
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o opentrusty -ldflags "-X main.version=$VERSION" ./cmd/opentrusty
+
+      - name: Prepare Release Artifacts
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          DIR="opentrusty-cli"
+          mkdir -p $DIR
+          
+          # Copy binary
+          cp opentrusty $DIR/
+          
+          # Copy deployment assets
+          cp deploy/install.sh $DIR/
+          cp deploy/README.md $DIR/
+          # CLI doesn't have systemd, but we maintain layout if possible
+          if [ -d "deploy/systemd" ]; then
+            mkdir -p $DIR/systemd
+            cp deploy/systemd/* $DIR/systemd/ || true
+          fi
+          cp .env.example $DIR/
+          
+          # Copy License if exists in root
+          if [ -f "LICENSE" ]; then cp LICENSE $DIR/; fi
+          
+          # Archive
+          tar -czf opentrusty-cli-$VERSION-linux-amd64.tar.gz $DIR
+          echo "ARTIFACT_NAME=opentrusty-cli-$VERSION-linux-amd64.tar.gz" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ env.ARTIFACT_NAME }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

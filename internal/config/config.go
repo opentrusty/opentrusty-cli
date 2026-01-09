@@ -20,7 +20,7 @@ import (
 )
 
 type Config struct {
-	DBURL          string
+	DatabaseURL    string
 	LogLevel       string
 	IdentitySecret string
 	BootstrapEmail string
@@ -29,7 +29,7 @@ type Config struct {
 
 func Load() (*Config, error) {
 	c := &Config{
-		DBURL:          os.Getenv("OPENTRUSTY_DB_URL"),
+		DatabaseURL:    os.Getenv("OPENTRUSTY_DATABASE_URL"),
 		LogLevel:       os.Getenv("OPENTRUSTY_LOG_LEVEL"),
 		IdentitySecret: os.Getenv("OPENTRUSTY_IDENTITY_SECRET"),
 		BootstrapEmail: os.Getenv("OPENTRUSTY_BOOTSTRAP_ADMIN_EMAIL"),
@@ -48,8 +48,8 @@ func Load() (*Config, error) {
 }
 
 func (c *Config) Validate() error {
-	if c.DBURL == "" {
-		return fmt.Errorf("OPENTRUSTY_DB_URL is required")
+	if c.DatabaseURL == "" {
+		return fmt.Errorf("OPENTRUSTY_DATABASE_URL is required")
 	}
 	if c.IdentitySecret == "" {
 		return fmt.Errorf("OPENTRUSTY_IDENTITY_SECRET is required")

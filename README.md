@@ -35,6 +35,13 @@ It is used for database migrations, initial system bootstrap, and headless admin
    ./opentrusty bootstrap
    ```
 
+## Deployment
+
+Pre-built binaries for the CLI are available in the [GitHub Releases](https://github.com/opentrusty/opentrusty-cli/releases).
+
+Detailed instructions are available in the [Canonical Deployment Guide](https://github.com/opentrusty/opentrusty-core/blob/main/DEPLOYMENT.md) and the `README.md` included in each release package.
+
 ## License
+
 
 Apache-2.0
