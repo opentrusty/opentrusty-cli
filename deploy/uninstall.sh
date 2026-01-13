@@ -24,6 +24,13 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Detect interactive mode
+INTERACTIVE=false
+if [ -t 0 ]; then INTERACTIVE=true; fi
+
+# Support force flag
+FORCE_REMOVE=${FORCE_REMOVE:-false}
+
 echo "Uninstalling OpenTrusty ${COMPONENT}..."
 echo ""
 
@@ -36,7 +43,13 @@ else
 fi
 
 # 3. Optional: Remove config
-read -p "Do you want to remove CLI configuration in ${CONFIG_DIR}/cli.env? (y/N): " REMOVE_CONFIG
+REMOVE_CONFIG="n"
+if [ "$INTERACTIVE" = true ] && [ "$FORCE_REMOVE" = false ]; then
+  read -p "Do you want to remove CLI configuration in ${CONFIG_DIR}/cli.env? (y/N): " REMOVE_CONFIG
+elif [ "$FORCE_REMOVE" = true ]; then
+  REMOVE_CONFIG="y"
+fi
+
 if [[ "$REMOVE_CONFIG" =~ ^[Yy]$ ]]; then
   rm -f "${CONFIG_DIR}/cli.env"
   log_info "Removed ${CONFIG_DIR}/cli.env"
