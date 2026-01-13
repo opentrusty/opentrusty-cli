@@ -6,6 +6,7 @@ set -e
 
 COMPONENT="cli"
 BINARY_NAME="opentrusty"
+VERSION="dev"
 
 # Colors for output
 RED='\033[0;31m'
@@ -36,10 +37,11 @@ else
   exit 1
 fi
 
-# 3. Create config directory (for cli.env if used)
+# 3. Create config directory and version file
 CONFIG_DIR="/etc/opentrusty"
 mkdir -p "${CONFIG_DIR}"
-log_info "Config directory ${CONFIG_DIR}/ exists."
+echo "$VERSION" > "${CONFIG_DIR}/${COMPONENT}.version"
+log_info "Config directory ${CONFIG_DIR}/ exists and version recorded."
 
 echo ""
 echo "============================================"

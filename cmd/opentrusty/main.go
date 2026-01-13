@@ -31,6 +31,11 @@ import (
 var version = "dev"
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "--version" {
+		println(version)
+		os.Exit(0)
+	}
+
 	if len(os.Args) < 2 {
 		fmt.Printf("OpenTrusty CLI version %s\n", version)
 		fmt.Println("Usage: opentrusty <command> [args]")
