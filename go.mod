@@ -4,6 +4,7 @@ go 1.25.3
 
 require (
 	github.com/jackc/pgx/v5 v5.8.0
+	github.com/joho/godotenv v1.5.1
 	github.com/opentrusty/opentrusty-core v0.0.0-20260108142213-20efe39d59b9
 )
 

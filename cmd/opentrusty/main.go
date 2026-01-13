@@ -46,7 +46,15 @@ func main() {
 	}
 
 	// Database
-	db, err := postgres.Open(ctx, cfg.DatabaseURL)
+	db, err := postgres.New(ctx, postgres.Config{
+		Host:     cfg.DBHost,
+		Port:     cfg.DBPort,
+		User:     cfg.DBUser,
+		Password: cfg.DBPassword,
+		Database: cfg.DBName,
+		SSLMode:  cfg.DBSSLMode,
+	})
+
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
