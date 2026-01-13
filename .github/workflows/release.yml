@@ -39,6 +39,7 @@ jobs:
           
           # Copy deployment assets
           cp deploy/install.sh $DIR/
+          sed -i "s/VERSION=\"dev\"/VERSION=\"$VERSION\"/" $DIR/install.sh
           cp deploy/README.md $DIR/
           # CLI doesn't have systemd, but we maintain layout if possible
           if [ -d "deploy/systemd" ]; then
