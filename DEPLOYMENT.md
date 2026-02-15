@@ -32,7 +32,7 @@ OpenTrusty provides a "One-Click" bootstrap script that handles component select
 
 ```bash
 # General usage
-curl -sSL https://raw.githubusercontent.com/opentrusty/opentrusty-core/main/scripts/bootstrap.sh | sudo bash -s [components]
+curl -sSL https://raw.githubusercontent.com/opentrusty/opentrusty-cli/main/scripts/bootstrap.sh | sudo bash -s [components]
 ```
 
 #### First-Time Initialization (The CLI "Workhorse")

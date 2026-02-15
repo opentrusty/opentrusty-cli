@@ -13,8 +13,14 @@ It is used for database migrations, initial system bootstrap, and headless admin
 
 ## Requirements
 
-- PostgreSQL (via `DATABASE_URL`)
+- PostgreSQL (via `OPENTRUSTY_DB_*` variables)
 - OpenTrusty Core (Go module)
+
+## Quick Install
+
+```bash
+curl -sSL https://raw.githubusercontent.com/opentrusty/opentrusty-cli/main/scripts/bootstrap.sh | sudo bash
+```
 
 ## Getting Started
 
@@ -39,7 +45,7 @@ It is used for database migrations, initial system bootstrap, and headless admin
 
 Pre-built binaries for the CLI are available in the [GitHub Releases](https://github.com/opentrusty/opentrusty-cli/releases).
 
-Detailed instructions are available in the [Canonical Deployment Guide](https://github.com/opentrusty/opentrusty-core/blob/main/DEPLOYMENT.md) and the `README.md` included in each release package.
+Detailed instructions are available in the [Deployment Guide](./DEPLOYMENT.md) and the `README.md` included in each release package.
 
 ## License
 
