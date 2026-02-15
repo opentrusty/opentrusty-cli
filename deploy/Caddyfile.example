@@ -1,0 +1,42 @@
+
+# Common proxy headers for OpenTrusty
+(proxy_headers) {
+    header_up Host {host}
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+}
+
+# OpenTrusty Auth Plane (Data Plane)
+auth.yourdomain.com {
+    reverse_proxy localhost:8080 {
+        import proxy_headers
+    }
+}
+
+# OpenTrusty Admin Plane (Control Plane API)
+admin.yourdomain.com {
+    reverse_proxy localhost:8081 {
+        import proxy_headers
+    }
+}
+
+# OpenTrusty Control Panel (UI Console)
+console.yourdomain.com {
+    root * /var/www/opentrusty-control-panel/dist
+    file_server
+    try_files {path} /index.html
+
+    header {
+        # Disable FLoC
+        Permissions-Policy "interest-cohort=()"
+        # Prevent XSS
+        X-XSS-Protection "1; mode=block"
+        # Prevent MIME sniffing
+        X-Content-Type-Options "nosniff"
+        # Referrer Policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Content Security Policy
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://admin.yourdomain.com https://auth.yourdomain.com;"
+    }
+}

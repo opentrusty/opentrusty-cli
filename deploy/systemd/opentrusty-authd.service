@@ -1,0 +1,18 @@
+[Unit]
+Description=OpenTrusty Authentication Plane (OIDC/OAuth2)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=opentrusty
+Group=opentrusty
+WorkingDirectory=/var/lib/opentrusty
+EnvironmentFile=/etc/opentrusty/auth.env
+ExecStart=/usr/local/bin/opentrusty-authd
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

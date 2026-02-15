@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    strategy:
+      matrix:
+        goos: [linux]
+        goarch: [amd64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -20,12 +24,10 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-
       - name: Build Binary
-
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o opentrusty -ldflags "-X main.version=$VERSION" ./cmd/opentrusty
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -o opentrusty -ldflags "-X main.version=$VERSION" ./cmd/opentrusty
 
       - name: Prepare Release Artifacts
         id: prepare
@@ -40,20 +42,17 @@ jobs:
           # Copy deployment assets
           cp deploy/install.sh $DIR/
           sed -i "s/VERSION=\"dev\"/VERSION=\"$VERSION\"/" $DIR/install.sh
+          cp deploy/uninstall.sh $DIR/
           cp deploy/README.md $DIR/
-          # CLI doesn't have systemd, but we maintain layout if possible
-          if [ -d "deploy/systemd" ]; then
-            mkdir -p $DIR/systemd
-            cp deploy/systemd/* $DIR/systemd/ || true
-          fi
           cp .env.example $DIR/
           
           # Copy License if exists in root
           if [ -f "LICENSE" ]; then cp LICENSE $DIR/; fi
           
           # Archive
-          tar -czf opentrusty-cli-$VERSION-linux-amd64.tar.gz $DIR
-          echo "artifact=opentrusty-cli-$VERSION-linux-amd64.tar.gz" >> $GITHUB_OUTPUT
+          ARTIFACT="opentrusty-cli-$VERSION-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz"
+          tar -czf "$ARTIFACT" $DIR
+          echo "artifact=$ARTIFACT" >> $GITHUB_OUTPUT
 
       - name: Create Release
         id: create_release

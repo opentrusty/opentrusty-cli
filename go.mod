@@ -5,7 +5,7 @@ go 1.25.3
 require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/joho/godotenv v1.5.1
-	github.com/opentrusty/opentrusty-core v0.1.7
+	github.com/opentrusty/opentrusty-core v0.2.0
 )
 
 require (
