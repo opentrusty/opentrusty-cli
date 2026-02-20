@@ -304,6 +304,14 @@ run_cli_bootstrapper() {
   export OPENTRUSTY_DB_SSLMODE="$OT_DB_SSLMODE"
   export OPENTRUSTY_IDENTITY_SECRET="$OT_IDENT_SECRET"
 
+  if command -v psql &> /dev/null; then
+    log_info "Ensuring database ${OT_DB_NAME} exists..."
+    export PGPASSWORD="${OT_DB_PASS}"
+    psql -h "$OT_DB_HOST" -p "$OT_DB_PORT" -U "$OT_DB_USER" -d postgres -c "CREATE DATABASE \"${OT_DB_NAME}\";" 2>/dev/null || true
+  else
+    log_warn "psql not found locally, cannot auto-create database. Please ensure '${OT_DB_NAME}' exists."
+  fi
+
   log_info "Running database migrations..."
   if ! opentrusty migrate; then
     log_error "Migration failed. Please check your DB credentials."

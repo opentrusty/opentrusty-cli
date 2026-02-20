@@ -57,6 +57,40 @@ elif [ "$FORCE_REMOVE" = true ]; then
 fi
 
 if [[ "$REMOVE_CONFIG" =~ ^[Yy]$ ]]; then
+  # Source credentials to know which DB to drop
+  if [ -f "${CONFIG_DIR}/cli.env" ]; then
+    source "${CONFIG_DIR}/cli.env"
+  fi
+
+  # 4. Optional: Drop Database
+  # Only prompt if no other OpenTrusty .version files exist (meaning no other components depend on the DB)
+  if [ -d "${CONFIG_DIR}" ] && ! ls "${CONFIG_DIR}"/*.version >/dev/null 2>&1; then
+    DROP_DB="n"
+    if [ "$INTERACTIVE" = true ] && [ "$FORCE_REMOVE" = false ]; then
+      echo ""
+      log_warn "No other OpenTrusty components are installed."
+      read -p "Do you want to completely DROP the OpenTrusty database '${OPENTRUSTY_DB_NAME}'? This is IRREVERSIBLE! (y/N): " DROP_DB
+    elif [ "$FORCE_REMOVE" = true ]; then
+      DROP_DB="y"
+    fi
+
+    if [[ "$DROP_DB" =~ ^[Yy]$ ]]; then
+      if command -v psql &> /dev/null; then
+        export PGPASSWORD="${OPENTRUSTY_DB_PASSWORD}"
+        log_info "Dropping database ${OPENTRUSTY_DB_NAME}..."
+        psql -h "${OPENTRUSTY_DB_HOST}" -p "${OPENTRUSTY_DB_PORT}" -U "${OPENTRUSTY_DB_USER}" -d postgres -c "DROP DATABASE IF EXISTS \"${OPENTRUSTY_DB_NAME}\";" || log_warn "Failed to drop database. You may need to drop it manually."
+      else
+        log_warn "psql command not found. Please drop the database '${OPENTRUSTY_DB_NAME}' manually."
+      fi
+    else
+      log_info "Preserved database '${OPENTRUSTY_DB_NAME}'."
+    fi
+  else
+    if [ -n "${OPENTRUSTY_DB_NAME}" ]; then
+      log_info "Preserved database '${OPENTRUSTY_DB_NAME}' (other components are still installed)."
+    fi
+  fi
+
   rm -f "${CONFIG_DIR}/cli.env"
   log_info "Removed ${CONFIG_DIR}/cli.env"
   
