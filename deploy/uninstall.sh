@@ -42,6 +42,12 @@ else
   log_info "No binary found at /usr/local/bin/${BINARY_NAME}"
 fi
 
+# Remove version file unconditionally
+if [ -f "${CONFIG_DIR}/${COMPONENT}.version" ]; then
+  rm -f "${CONFIG_DIR}/${COMPONENT}.version"
+  log_info "Removed version record ${CONFIG_DIR}/${COMPONENT}.version"
+fi
+
 # 3. Optional: Remove config
 REMOVE_CONFIG="n"
 if [ "$INTERACTIVE" = true ] && [ "$FORCE_REMOVE" = false ]; then
