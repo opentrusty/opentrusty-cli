@@ -16,11 +16,13 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/opentrusty/opentrusty-cli/internal/bootstrap"
 	"github.com/opentrusty/opentrusty-cli/internal/config"
 	"github.com/opentrusty/opentrusty-core/audit"
@@ -29,6 +31,37 @@ import (
 )
 
 var version = "dev"
+
+func ensureDatabaseExists(cfg *config.Config) error {
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=postgres sslmode=%s",
+		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBSSLMode)
+
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		return fmt.Errorf("failed to connect to postgres server: %w", err)
+	}
+
+	var exists bool
+	query := `SELECT EXISTS(SELECT datname FROM pg_catalog.pg_database WHERE datname = $1)`
+	if err := db.QueryRow(query, cfg.DBName).Scan(&exists); err != nil {
+		return fmt.Errorf("failed to check if database exists: %w", err)
+	}
+
+	if !exists {
+		fmt.Printf("Database %q does not exist, creating it...\n", cfg.DBName)
+		quotedDBName := fmt.Sprintf(`"%s"`, cfg.DBName)
+		if _, err := db.Exec(fmt.Sprintf("CREATE DATABASE %s", quotedDBName)); err != nil {
+			return fmt.Errorf("failed to create database: %w", err)
+		}
+	}
+
+	return nil
+}
 
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "--version" {
@@ -48,6 +81,13 @@ func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("failed to load configuration: %v", err)
+	}
+
+	// Auto-create database if running setup commands
+	if cmd == "migrate" || cmd == "bootstrap" {
+		if err := ensureDatabaseExists(cfg); err != nil {
+			log.Fatalf("pre-flight database check failed: %v", err)
+		}
 	}
 
 	// Database
