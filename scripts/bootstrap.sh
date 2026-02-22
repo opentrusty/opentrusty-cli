@@ -525,16 +525,23 @@ configure_plane_env() {
   collect_db_credentials
 
   local inject_base_url=""
+  local inject_cors_origins=""
   if [ "$plane" = "admin" ] && [ -n "$OT_DOMAIN_ADMIN" ]; then
     inject_base_url="https://${OT_DOMAIN_ADMIN}"
   elif [ "$plane" = "auth" ] && [ -n "$OT_DOMAIN_AUTH" ]; then
     inject_base_url="https://${OT_DOMAIN_AUTH}"
   fi
 
+  # For admin plane, set CORS origin to allow the Control Panel domain
+  if [ "$plane" = "admin" ] && [ -n "$OT_DOMAIN_CONSOLE" ]; then
+    inject_cors_origins="https://${OT_DOMAIN_CONSOLE}"
+  fi
+
   log_info "Configuring $env_file with collected credentials..."
 
   # Overwrite key variables in the env file
   local tmp_env
+  local cors_handled=false
   tmp_env=$(mktemp)
   while IFS= read -r line || [ -n "$line" ]; do
     case "$line" in
@@ -553,9 +560,23 @@ configure_plane_env() {
       OPENTRUSTY_DB_SSLMODE=*)  echo "OPENTRUSTY_DB_SSLMODE=$OT_DB_SSLMODE" ;;
       OPENTRUSTY_IDENTITY_SECRET=*) echo "OPENTRUSTY_IDENTITY_SECRET=$OT_IDENT_SECRET" ;;
       OPENTRUSTY_SESSION_SECRET=*)  echo "OPENTRUSTY_SESSION_SECRET=$OT_SESSION_SECRET" ;;
+      OPENTRUSTY_CORS_ALLOWED_ORIGINS=*)
+        if [ -n "$inject_cors_origins" ]; then
+          echo "OPENTRUSTY_CORS_ALLOWED_ORIGINS=$inject_cors_origins"
+        else
+          echo "$line"
+        fi
+        cors_handled=true
+        ;;
       *) echo "$line" ;;
     esac
   done < "$env_file" > "$tmp_env"
+
+  # If the .env file didn't contain CORS variable yet, append it
+  if [ "$cors_handled" = false ] && [ -n "$inject_cors_origins" ]; then
+    echo "OPENTRUSTY_CORS_ALLOWED_ORIGINS=$inject_cors_origins" >> "$tmp_env"
+  fi
+
   mv "$tmp_env" "$env_file"
   chmod 600 "$env_file"
   chown opentrusty:opentrusty "$env_file" 2>/dev/null || true
