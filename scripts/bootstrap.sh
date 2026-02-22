@@ -305,20 +305,34 @@ collect_domains() {
   
   if echo "$COMPONENTS_ORIG" | grep -qw "admin"; then
     read_tty "Enter domain for Admin Plane (leave blank if none): " OT_DOMAIN_ADMIN
+  elif echo "$COMPONENTS_ORIG" | grep -qw "control-panel"; then
+    echo ""
+    log_info "Control Panel requires the Admin Plane API to function."
+    read_tty "Enter public Admin Plane API URL (e.g. https://admin.example.com/api/v1): " OPENTRUSTY_API_URL
   fi
+
   if echo "$COMPONENTS_ORIG" | grep -qw "auth"; then
     read_tty "Enter domain for Auth Plane (leave blank if none): " OT_DOMAIN_AUTH
+  elif echo "$COMPONENTS_ORIG" | grep -qw "control-panel"; then
+    log_info "Control Panel requires the Auth Plane URL."
+    read_tty "Enter public Auth Plane URL (e.g. https://auth.example.com): " OPENTRUSTY_AUTH_URL
   fi
+
   if echo "$COMPONENTS_ORIG" | grep -qw "control-panel"; then
     read_tty "Enter domain for Control Panel (leave blank if none): " OT_DOMAIN_CONSOLE
   fi
 
   # Support Control Panel installer defaults which rely on OPENTRUSTY_API_URL and OPENTRUSTY_AUTH_URL
-  if [ -n "$OT_DOMAIN_ADMIN" ]; then
+  if [ -z "$OPENTRUSTY_API_URL" ] && [ -n "$OT_DOMAIN_ADMIN" ]; then
     export OPENTRUSTY_API_URL="https://${OT_DOMAIN_ADMIN}/api/v1"
+  else
+    export OPENTRUSTY_API_URL
   fi
-  if [ -n "$OT_DOMAIN_AUTH" ]; then
+
+  if [ -z "$OPENTRUSTY_AUTH_URL" ] && [ -n "$OT_DOMAIN_AUTH" ]; then
     export OPENTRUSTY_AUTH_URL="https://${OT_DOMAIN_AUTH}"
+  else
+    export OPENTRUSTY_AUTH_URL
   fi
   
   DOMAINS_COLLECTED=true
@@ -524,6 +538,7 @@ configure_plane_env() {
 if is_interactive; then
   collect_db_credentials
   collect_domains
+  configure_web_server
 fi
 
 # Ensure CLI is installed first if selected (handles migrations)
@@ -559,10 +574,6 @@ for comp in $COMPONENTS; do
     fi
   fi
 done
-
-if is_interactive; then
-  configure_web_server
-fi
 
 # 7. Post-install summary
 echo ""
