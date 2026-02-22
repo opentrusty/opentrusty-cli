@@ -33,7 +33,7 @@ import (
 var version = "dev"
 
 func ensureDatabaseExists(cfg *config.Config) error {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=postgres sslmode=%s",
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=postgres sslmode=%s",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBSSLMode)
 
 	db, err := sql.Open("pgx", dsn)
