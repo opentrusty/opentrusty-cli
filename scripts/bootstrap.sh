@@ -344,6 +344,10 @@ collect_domains() {
 
   if echo "$COMPONENTS_ORIG" | grep -qw "control-panel"; then
     read_tty "Enter domain for Control Panel (leave blank if none): " OT_DOMAIN_CONSOLE
+  elif echo "$COMPONENTS_ORIG" | grep -qw "admin"; then
+    echo ""
+    log_info "If you have a Control Panel, provide its domain so CORS can be configured."
+    read_tty "Enter Control Panel domain (leave blank if none): " OT_DOMAIN_CONSOLE
   fi
 
   # Support Control Panel installer defaults which rely on OPENTRUSTY_API_URL and OPENTRUSTY_AUTH_URL
