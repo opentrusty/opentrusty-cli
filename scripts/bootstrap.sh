@@ -392,6 +392,11 @@ configure_web_server() {
     # Optional backup
     if [ -f "$caddyfile" ]; then
       cp "$caddyfile" "${caddyfile}.bak.$(date +%F_%T)"
+      
+      # Strip existing OpenTrusty block to prevent duplicate snippets if run multiple times
+      if grep -q "# OpenTrusty Configuration - auto-generated" "$caddyfile"; then
+        sed -i '/# OpenTrusty Configuration - auto-generated/,$d' "$caddyfile"
+      fi
     fi
 
     echo "" >> "$caddyfile"
