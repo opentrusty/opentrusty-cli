@@ -120,7 +120,7 @@ func main() {
 		auditRepo := postgres.NewAuditRepository(db)
 
 		hasher := user.NewPasswordHasher(65536, 1, 1, 16, 32)
-		userService := user.NewService(userRepo, hasher, auditLogger, 5, 15*time.Minute, cfg.IdentitySecret)
+		userService := user.NewService(userRepo, hasher, auditLogger, 5, 15*time.Minute, string(config.DecodeSecret(cfg.IdentitySecret)))
 
 		email := cfg.BootstrapEmail
 		if email == "" {
