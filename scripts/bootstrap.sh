@@ -146,6 +146,30 @@ if [ "$1" = "uninstall" ]; then
     rm -rf "$comp-uninstall" "$tarball"
   done
   
+  # Caddy Cleanup
+  if [ -f "/etc/caddy/Caddyfile" ] && grep -q "# OpenTrusty Configuration - auto-generated" /etc/caddy/Caddyfile; then
+    # Only offer to remove Caddy config if no OpenTrusty components seem to remain
+    if ! ls /etc/opentrusty/*.version >/dev/null 2>&1 && [ ! -d "/var/www/opentrusty-control-panel/dist" ]; then
+      REMOVE_CADDY="n"
+      if is_interactive; then
+        echo ""
+        read_tty "Do you want to remove OpenTrusty configurations from your Caddy proxy? (y/N): " REMOVE_CADDY
+      else
+        REMOVE_CADDY="y"
+      fi
+
+      if [[ "$REMOVE_CADDY" =~ ^[Yy]$ ]]; then
+        sed -i '/# OpenTrusty Configuration - auto-generated/,$d' /etc/caddy/Caddyfile
+        if command -v systemctl &> /dev/null; then
+          systemctl reload caddy || true
+        fi
+        log_info "Removed OpenTrusty rules from /etc/caddy/Caddyfile."
+      else
+        log_info "Preserved OpenTrusty rules in /etc/caddy/Caddyfile."
+      fi
+    fi
+  fi
+  
   log_success "Uninstallation complete."
   exit 0
 fi
